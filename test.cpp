@@ -8,6 +8,7 @@ using namespace std;
     cout.fill('-');
     cout.setf(ios::left);
     cout <<i <<endl;
+    cout << " Test "
     return 0;
 
 
