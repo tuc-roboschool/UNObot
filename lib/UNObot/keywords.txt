@@ -3,6 +3,8 @@ read_line_sensors	KEYWORD2
 get_distance		KEYWORD2
 wait_for_button		KEYWORD2
 wait_for_any_button	KEYWORD2
+left_led		KEYWORD2
+right_led		KEYWORD2
 r_led			KEYWORD2
 y_led			KEYWORD2
 g_led			KEYWORD2
@@ -12,7 +14,10 @@ g_led_pwm		KEYWORD2
 UNObot_init		KEYWORD2
 clear			KEYWORD2
 print			KEYWORD2
+print_long 		KEYWORD2
 lcd_goto_xy		KEYWORD2
 buzzer			KEYWORD2
+check_battery		KEYWORD2
+batterymillivolts	KEYWORD2
 get_software_version	KEYWORD2
 get_hardware_version	KEYWORD2
