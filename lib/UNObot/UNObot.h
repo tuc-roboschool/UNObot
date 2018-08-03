@@ -24,6 +24,8 @@ void clear();
 void print(String data);
 void print(int data);
 void lcd_goto_xy(int x, int y);
+void bar_manually( int height, int column , int row);
+void bar(int min, int max , int value, int column, int row);
 void buzzer(int frequency, int duration);
 void UNObot_init();
 int get_hardware_version();

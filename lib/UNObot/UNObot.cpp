@@ -1,7 +1,7 @@
 /*
-  This library is for UNObots of Version 1 and 2.
-  UNObot.cpp - Library for UNObot V2 and V1
-  Created by Florian Zylla, June 27, 2018.
+  This library is for UNObots of Version 1,2 and 3.
+  UNObot.cpp - Library for UNObot V3, V2 and V1
+  Created by Florian Zylla, July 3, 2018.
 */
 
 //Library is set by default to version 3.
@@ -20,7 +20,7 @@
         int hardware_version=3;
         //later the library with the basic functions will be extended with
         //more functions ;in the start up, that will be shown with a + behind the version
-        boolean upgrade = false;
+        boolean upgrade = true;
 
     //Display declaration
         int rs=13;
@@ -70,16 +70,73 @@
     //Servo Declaration
         int servo=14;//A0 is Servo Data
 
-    #define BUTTON_A 0
-    #define BUTTON_B 1
-    #define BUTTON_C 2
-    #define ANY_BUTTON 3
-    // PINs A1 and 5 are free, but the should be used to attach an IR-Distance
-    // -Sensor on a Servo with a 180° angle to detect objects
+
+    // Custom Character Declaration for bar-functions
+        byte bar2[] = {
+          B00000,
+          B00000,
+          B00000,
+          B00000,
+          B00000,
+          B11111,
+          B11111,
+          B00000
+        };
+        byte bar3[] = {
+          B00000,
+          B00000,
+          B00000,
+          B00000,
+          B11111,
+          B11111,
+          B11111,
+          B00000
+        };
+        byte bar4[] = {
+          B00000,
+          B00000,
+          B00000,
+          B11111,
+          B11111,
+          B11111,
+          B11111,
+          B00000
+        };
+        byte bar5[] = {
+          B00000,
+          B00000,
+          B11111,
+          B11111,
+          B11111,
+          B11111,
+          B11111,
+          B00000
+        };
+        byte bar6[] = {
+          B00000,
+          B11111,
+          B11111,
+          B11111,
+          B11111,
+          B11111,
+          B11111,
+          B00000
+        };
+        byte bar7[] = {
+          B11111,
+          B11111,
+          B11111,
+          B11111,
+          B11111,
+          B11111,
+          B11111,
+          B00000
+        };
 
     //motors
         void set_motors(int left_speed, int right_speed)
         {
+            //set pins to output (pins 0 and 1 also used for serial communication
             pinMode(A_IN1_EN,OUTPUT);
             pinMode(A_IN2_PH,OUTPUT);
             pinMode(B_IN1_EN,OUTPUT);
@@ -89,7 +146,7 @@
             analogWrite(B_IN1_EN,0);
             digitalWrite(A_IN2_PH,LOW);
             digitalWrite(B_IN2_PH,LOW);
-            //detect backward driving
+            //detect backward driving and set phase pin
             if(right_speed<0)
             {
                 digitalWrite(A_IN2_PH,HIGH);
@@ -100,6 +157,7 @@
                 digitalWrite(B_IN2_PH,HIGH);
 
             }
+            //make parameters positive
             if(left_speed<0)
             {
 
@@ -144,7 +202,7 @@
             return;
         }
 
-        //ultrasonic sensor measurement
+        //ultrasonic sensor
         int get_distance()
         {
             int sum=0;
@@ -271,7 +329,7 @@
         }
 
         //PWM
-        //right led
+        //red led
         void r_led_pwm(int brightness)
         {
         pinMode(B_2,OUTPUT);
@@ -285,7 +343,7 @@
         analogWrite(B_2,255-brightness);
         return;
         }
-        //middle led
+        //yellow led
         void y_led_pwm(int brightness)
         {
         pinMode(B_1,OUTPUT);
@@ -299,7 +357,7 @@
         analogWrite(B_1,255-brightness);
         return;
         }
-        //left led
+        //green led
         void g_led_pwm(int brightness)
         {
         pinMode(B_0,OUTPUT);
@@ -314,6 +372,87 @@
         return;
         }
 
+
+
+    //buzzer
+
+    void buzzer(int frequency, int duration)
+    {
+        tone(BUZZER,frequency,duration);
+    }
+
+    //others
+        //init function
+        void UNObot_init()
+        {
+            //turn on first led
+            r_led(1);
+            //set servo to neutral position
+            pinMode(servo,OUTPUT);
+            for(int i=0; i<20;i++)  //generate PWM 50 Hz
+            {
+                digitalWrite(servo,HIGH);
+                delayMicroseconds(1500);// 1500 is neutral
+                digitalWrite(servo,LOW);
+                delayMicroseconds(1500);
+                delay(17);
+
+            }
+            //turn on second led
+            y_led(1);
+            //set pin usage
+            pinMode(A_IN1_EN,OUTPUT);
+            pinMode(A_IN2_PH,OUTPUT);
+            pinMode(B_IN1_EN,OUTPUT);
+            pinMode(B_IN2_PH,OUTPUT);
+            pinMode(trigger,OUTPUT);
+            pinMode(echo,INPUT);
+            pinMode(BUZZER,OUTPUT);
+            //turn off motors
+            set_motors(0,0);
+            //initialize display
+            lcd.begin(8,2);
+            //load custom characters
+            lcd.createChar(0, bar2);
+            lcd.createChar(1, bar3);
+            lcd.createChar(2, bar4);
+            lcd.createChar(3, bar5);
+            lcd.createChar(4, bar6);
+            lcd.createChar(5, bar7);
+            //show name and version
+            lcd.clear();
+            lcd.setCursor(1,0);
+            lcd.print("UNObot");
+            lcd.setCursor(3,1);
+            lcd.print("V");
+            lcd.setCursor(4,1);
+            lcd.print(get_hardware_version());
+            lcd.setCursor(5,1);
+            if(get_software_version())
+                lcd.print("+");
+            //make sound
+            buzzer(5000,500);//buzzer deactivates pwm on red led
+            //wait and activate green led
+            delay(500);
+            g_led(1);
+            //finish init: turn off leds and set display to normal
+            delay(500);
+            r_led(0);
+            y_led(0);
+            g_led(0);
+            lcd.clear();
+            lcd.home();
+        }
+
+        //versions for init
+        int get_hardware_version()
+        {
+            return hardware_version;
+        }
+        boolean get_software_version()
+        {
+            return upgrade;
+        }
     //display
     void clear()
     {
@@ -331,78 +470,60 @@
     {
         lcd.setCursor(x,y);
     }
-
-    //buzzer
-
-    void buzzer(int frequency, int duration)
+    //shows a bar with given height at a given position
+    void bar_manually( int height, int column , int row)
     {
-        tone(BUZZER,frequency,duration);
+      lcd.setCursor(column,row);
+      //height 0 and 1 are already part of the character ROM
+      switch(height){
+          case 0:
+            lcd.write(B00100000);
+          break;
+          case 1:
+            lcd.write(B01011111);
+          break;
+          case 2:
+            lcd.write(byte(0));
+          break;
+          case 3:
+            lcd.write(byte(1));
+          break;
+          case 4:
+            lcd.write(byte(2));
+          break;
+          case 5:
+            lcd.write(byte(3));
+          break;
+          case 6:
+            lcd.write(byte(4));
+          break;
+          case 7:
+            lcd.write(byte(5));
+          break;
+      }
     }
+    //calculates the height of the bar in a given range by a given value
+    //at the requested position
+    void bar(int min, int max , int value, int column, int row)
+    {
 
-    //others
-        //init function
-        void UNObot_init()
-        {
-
-            r_led(1);
-            pinMode(servo,OUTPUT);
-            for(int i=0; i<20;i++)  //generate PWM 50 Hz
-            {
-                digitalWrite(servo,HIGH);
-                delayMicroseconds(1500);// 1500 is neutral
-                digitalWrite(servo,LOW);
-                delayMicroseconds(1500);
-                delay(17);
-
-            }
-            y_led(1);
-            pinMode(A_IN1_EN,OUTPUT);
-            pinMode(A_IN2_PH,OUTPUT);
-            pinMode(B_IN1_EN,OUTPUT);
-            pinMode(B_IN2_PH,OUTPUT);
-            pinMode(trigger,OUTPUT);
-            pinMode(echo,INPUT);
-            pinMode(BUZZER,OUTPUT);
-            set_motors(0,0);
-
-            lcd.begin(8,2);
-            lcd.clear();
-            lcd.setCursor(1,0);
-            lcd.print("UNObot");
-            lcd.setCursor(3,1);
-            lcd.print("V");
-            lcd.setCursor(4,1);
-            lcd.print(get_hardware_version());
-            lcd.setCursor(5,1);
-            if(get_software_version())
-                lcd.print("+");
-            buzzer(5000,500);//buzzer deactivates pwm on red led
-            delay(500);
-            g_led(1);
-            delay(500);
-            r_led(0);
-            y_led(0);
-            g_led(0);
-
-
-
-
-
-
-            lcd.clear();
-            lcd.home();
-
-        }
-
-        //versions
-        int get_hardware_version()
-        {
-            return hardware_version;
-        }
-        boolean get_software_version()
-        {
-            return upgrade;
-        }
+          if(((value>=min)&&(value<=(max/8)))||(value<min))
+              bar_manually(0,column, row);
+          if((value>(max/8))&&(value<((max*2)/8)))
+              bar_manually(1,column, row);
+          if((value>((max*2)/8))&&(value<=((max*3)/8)))
+              bar_manually(2,column, row);
+          if((value>((max*3)/8))&&(value<=((max*4)/8)))
+              bar_manually(3,column, row);
+          if((value>((max*4)/8))&&(value<=((max*5)/8)))
+              bar_manually(4,column, row);
+          if((value>((max*5)/8))&&(value<=((max*6)/8)))
+              bar_manually(5,column, row);
+          if((value>((max*6)/8))&&(value<=((max*7)/8)))
+              bar_manually(6,column, row);
+          if(((value>((max*7)/8))&&(value<=(max)))||(max<value))
+              bar_manually(7,column, row);
+    }
 #endif
 
 #if (V==2)
