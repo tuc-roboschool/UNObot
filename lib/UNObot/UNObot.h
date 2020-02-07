@@ -1,6 +1,6 @@
 /*
   UNObot.h - Library for UNObot by Roboschool .
-  Created by Florian Zylla, October 5, 2017.
+  Created by Florian Zylla, February 7, 2020.
 
 */
 #ifndef UNObot_h
@@ -11,7 +11,6 @@
 void set_motors(int left_speed, int right_speed);
 void read_line_sensors(int values[]);
 int get_distance();
-void scan_front(int data[]);
 bool wait_for_button(int button);
 int wait_for_any_button();
 void r_led(boolean state);
